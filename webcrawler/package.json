@@ -1,0 +1,23 @@
+{
+  "name": "webcrawler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Weitingchien/Amazon_application.git"
+  },
+  "author": "Ting",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Weitingchien/Amazon_application/issues"
+  },
+  "homepage": "https://github.com/Weitingchien/Amazon_application#readme",
+  "dependencies": {
+    "axios": "^1.2.1",
+    "cheerio": "^1.0.0-rc.12"
+  }
+}
