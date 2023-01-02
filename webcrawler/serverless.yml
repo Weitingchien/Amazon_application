@@ -11,40 +11,33 @@ plugins:
 provider:
   name: aws
   runtime: nodejs12.x
+  iam:
+    role:
+      statements:
+        - Effect: 'Allow'
+          Resource:
+            - Fn::GetAtt: ['${self:custom.bookstore}', Arn]
+          Action:
+            - dynamodb:DescribeTable
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:BatchWriteItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
 
-environment:
-  TABLE_NAME:
-    Ref: self:custom.bookstore
+  environment:
+    TABLE_NAME:
+      Ref: ${self:custom.bookstore}
 
-# 當lambda function 啟動時的進入點，要用哪些layer
-functions:
-  scrape:
-    handler: api/handler.scrape
-    iamRoleStatementsName: admin
-    iamRoleStatements:
-      - Effect: 'Allow'
-        Action:
-          - dynamodb:DescribeTable
-          - dynamodb:Query
-          - dynamodb:Scan
-          - dynamodb:GetItem
-          - dynamodb:PutItem
-          - dynamodb:UpdateItem
-          - dynamodb:DeleteItem
-        Resource: 'arn:aws:dynamodb:us-east-1:655258975055:table/bookstore'
-    events:
-      - http:
-          path: scrape
-          method: get
-          #cors: true
-
-# 自定義需額外佈署的AWS資源
+# 自定義需額外佈署的AWS資源，設定DB
 resources:
   Resources:
-    myTable:
+    bookstore:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:custom.bookstore}
+        TableName: bookstore
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
@@ -54,3 +47,24 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+# 當lambda function 啟動時的進入點，要用哪些layer
+
+functions:
+  scrape:
+    handler: api/handler.scrape
+    events:
+      - http:
+          path: scrape
+          method: get
+  getBooks:
+    handler: api/handler.list
+    events:
+      - http:
+          path: list
+          method: get
+  writeBook:
+    handler: api/handler.testWrite
+    events:
+      - http:
+          path: testWrite
+          method: get

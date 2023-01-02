@@ -77,6 +77,18 @@
         "LogGroupName": "/aws/lambda/webcrawler-dev-scrape"
       }
     },
+    "GetBooksLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/webcrawler-dev-getBooks"
+      }
+    },
+    "WriteBookLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/webcrawler-dev-writeBook"
+      }
+    },
     "IamRoleLambdaExecution": {
       "Type": "AWS::IAM::Role",
       "Properties": {
@@ -133,6 +145,27 @@
                       "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/webcrawler-dev*:*:*"
                     }
                   ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::GetAtt": [
+                        "bookstore",
+                        "Arn"
+                      ]
+                    }
+                  ],
+                  "Action": [
+                    "dynamodb:DescribeTable",
+                    "dynamodb:Query",
+                    "dynamodb:Scan",
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:BatchWriteItem",
+                    "dynamodb:UpdateItem",
+                    "dynamodb:DeleteItem"
+                  ]
                 }
               ]
             }
@@ -161,33 +194,123 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/webcrawler/dev/1672247335796-2022-12-28T17:08:55.796Z/webcrawler.zip"
+          "S3Key": "serverless/webcrawler/dev/1672389678677-2022-12-30T08:41:18.677Z/webcrawler.zip"
         },
         "Handler": "api/handler.scrape",
         "Runtime": "nodejs12.x",
         "FunctionName": "webcrawler-dev-scrape",
         "MemorySize": 1024,
         "Timeout": 6,
+        "Environment": {
+          "Variables": {
+            "TABLE_NAME": {
+              "Ref": "bookstore"
+            }
+          }
+        },
         "Role": {
           "Fn::GetAtt": [
-            "ScrapeIamRoleLambdaExecution",
+            "IamRoleLambdaExecution",
             "Arn"
           ]
         }
       },
       "DependsOn": [
-        "ScrapeIamRoleLambdaExecution",
         "ScrapeLogGroup"
       ]
     },
-    "ScrapeLambdaVersionhcjMrf1JfYpwSutpSuO08KGSki2js3CboIJzNNTrE": {
+    "GetBooksLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/webcrawler/dev/1672389678677-2022-12-30T08:41:18.677Z/webcrawler.zip"
+        },
+        "Handler": "api/handler.list",
+        "Runtime": "nodejs12.x",
+        "FunctionName": "webcrawler-dev-getBooks",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Environment": {
+          "Variables": {
+            "TABLE_NAME": {
+              "Ref": "bookstore"
+            }
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "GetBooksLogGroup"
+      ]
+    },
+    "WriteBookLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/webcrawler/dev/1672389678677-2022-12-30T08:41:18.677Z/webcrawler.zip"
+        },
+        "Handler": "api/handler.testWrite",
+        "Runtime": "nodejs12.x",
+        "FunctionName": "webcrawler-dev-writeBook",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Environment": {
+          "Variables": {
+            "TABLE_NAME": {
+              "Ref": "bookstore"
+            }
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "WriteBookLogGroup"
+      ]
+    },
+    "ScrapeLambdaVersionNE7NRvAMwlFrsYqA3Lm6pIAa3XZm5fH9ipHSPJHU": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "ScrapeLambdaFunction"
         },
-        "CodeSha256": "kzu+iRILao9EiSm57xUUUCEG+b5w6YfUACRxLEGMylo="
+        "CodeSha256": "8l2LxngPfb24NOPZyvans4GfSVxqUgb4jvC++BTRa0U="
+      }
+    },
+    "GetBooksLambdaVersion3AMLHVX0A8tIDgFX7WKNzc4Nf79DZlwp6tg5zUGDlQs": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "GetBooksLambdaFunction"
+        },
+        "CodeSha256": "8l2LxngPfb24NOPZyvans4GfSVxqUgb4jvC++BTRa0U="
+      }
+    },
+    "WriteBookLambdaVersion7gqYEfQ2MsPLnHlpp1czyfqgzb0jm6n3jA0tj7scs": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "WriteBookLambdaFunction"
+        },
+        "CodeSha256": "8l2LxngPfb24NOPZyvans4GfSVxqUgb4jvC++BTRa0U="
       }
     },
     "ApiGatewayRestApi": {
@@ -212,6 +335,36 @@
           ]
         },
         "PathPart": "scrape",
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        }
+      }
+    },
+    "ApiGatewayResourceList": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "ApiGatewayRestApi",
+            "RootResourceId"
+          ]
+        },
+        "PathPart": "list",
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        }
+      }
+    },
+    "ApiGatewayResourceTestwrite": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "ApiGatewayRestApi",
+            "RootResourceId"
+          ]
+        },
+        "PathPart": "testWrite",
         "RestApiId": {
           "Ref": "ApiGatewayRestApi"
         }
@@ -263,7 +416,99 @@
         "ScrapeLambdaPermissionApiGateway"
       ]
     },
-    "ApiGatewayDeployment1672247331742": {
+    "ApiGatewayMethodListGet": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "GET",
+        "RequestParameters": {},
+        "ResourceId": {
+          "Ref": "ApiGatewayResourceList"
+        },
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        },
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "GetBooksLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        },
+        "MethodResponses": []
+      },
+      "DependsOn": [
+        "GetBooksLambdaPermissionApiGateway"
+      ]
+    },
+    "ApiGatewayMethodTestwriteGet": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "GET",
+        "RequestParameters": {},
+        "ResourceId": {
+          "Ref": "ApiGatewayResourceTestwrite"
+        },
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        },
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "WriteBookLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        },
+        "MethodResponses": []
+      },
+      "DependsOn": [
+        "WriteBookLambdaPermissionApiGateway"
+      ]
+    },
+    "ApiGatewayDeployment1672389675271": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": {
@@ -272,7 +517,9 @@
         "StageName": "dev"
       },
       "DependsOn": [
-        "ApiGatewayMethodScrapeGet"
+        "ApiGatewayMethodScrapeGet",
+        "ApiGatewayMethodListGet",
+        "ApiGatewayMethodTestwriteGet"
       ]
     },
     "ScrapeLambdaPermissionApiGateway": {
@@ -312,76 +559,81 @@
         }
       }
     },
-    "ScrapeIamRoleLambdaExecution": {
-      "Type": "AWS::IAM::Role",
+    "GetBooksLambdaPermissionApiGateway": {
+      "Type": "AWS::Lambda::Permission",
       "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Principal": {
-                "Service": [
-                  "lambda.amazonaws.com"
-                ]
-              },
-              "Action": [
-                "sts:AssumeRole"
-              ]
-            }
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "GetBooksLambdaFunction",
+            "Arn"
           ]
         },
-        "Policies": [
-          {
-            "PolicyName": {
-              "Fn::Join": [
-                "-",
-                [
-                  "webcrawler",
-                  "dev",
-                  "lambda"
-                ]
-              ]
-            },
-            "PolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "logs:CreateLogStream",
-                    "logs:CreateLogGroup",
-                    "logs:PutLogEvents"
-                  ],
-                  "Resource": [
-                    {
-                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/webcrawler-dev-scrape:*:*"
-                    }
-                  ]
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "dynamodb:DescribeTable",
-                    "dynamodb:Query",
-                    "dynamodb:Scan",
-                    "dynamodb:GetItem",
-                    "dynamodb:PutItem",
-                    "dynamodb:UpdateItem",
-                    "dynamodb:DeleteItem"
-                  ],
-                  "Resource": "arn:aws:dynamodb:us-east-1:655258975055:table/bookstore"
-                }
-              ]
-            }
-          }
-        ],
-        "Path": "/",
-        "RoleName": "admin",
-        "ManagedPolicyArns": []
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "/*/*"
+            ]
+          ]
+        }
       }
     },
-    "myTable": {
+    "WriteBookLambdaPermissionApiGateway": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "WriteBookLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "/*/*"
+            ]
+          ]
+        }
+      }
+    },
+    "bookstore": {
       "Type": "AWS::DynamoDB::Table",
       "Properties": {
         "TableName": "bookstore",
@@ -416,10 +668,28 @@
     "ScrapeLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "ScrapeLambdaVersionhcjMrf1JfYpwSutpSuO08KGSki2js3CboIJzNNTrE"
+        "Ref": "ScrapeLambdaVersionNE7NRvAMwlFrsYqA3Lm6pIAa3XZm5fH9ipHSPJHU"
       },
       "Export": {
         "Name": "sls-webcrawler-dev-ScrapeLambdaFunctionQualifiedArn"
+      }
+    },
+    "GetBooksLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "GetBooksLambdaVersion3AMLHVX0A8tIDgFX7WKNzc4Nf79DZlwp6tg5zUGDlQs"
+      },
+      "Export": {
+        "Name": "sls-webcrawler-dev-GetBooksLambdaFunctionQualifiedArn"
+      }
+    },
+    "WriteBookLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "WriteBookLambdaVersion7gqYEfQ2MsPLnHlpp1czyfqgzb0jm6n3jA0tj7scs"
+      },
+      "Export": {
+        "Name": "sls-webcrawler-dev-WriteBookLambdaFunctionQualifiedArn"
       }
     },
     "ServiceEndpoint": {
